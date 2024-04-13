@@ -1,0 +1,2 @@
+exclude = ["venv",".venv","migrations"]
+line-length = 100
