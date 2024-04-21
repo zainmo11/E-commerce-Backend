@@ -13,4 +13,4 @@ select = ["E","F","I","N","T20","BLE"]
 fixable = ["ALL"]
 
 # E501: line too long
-ignore = ["E501"]
+ignore = ["E501","F401"]
