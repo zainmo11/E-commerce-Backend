@@ -10,6 +10,8 @@ jobs:
   test-backend:
 
     runs-on: ubuntu-latest
+    env:
+      SECRET_KEY: "*6ec)vr!%n1gc5w#7d88iz7n1+wrv-1-2ll&nrw#+nkyy1*^($"
     strategy:
       matrix:
         include:
