@@ -1,0 +1,24 @@
+databases:
+  - name: distributeddb
+    plan: free
+    databaseName: distdb
+    user: abdelrhman
+
+services:
+  - type: web
+    plan: free
+    name: distributed_project_backend
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "python -m gunicorn distributed_project.asgi:application -k uvicorn.workers.UvicornWorker"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mysitedb
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: PROD
+        value: true
