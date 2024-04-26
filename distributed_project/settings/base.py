@@ -2,6 +2,9 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ALGORITHM = "HS256"
+AUTHENTICATION_BACKENDS = ["authentication.authenticator.EmailAuthenticationBackend"]
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -9,9 +12,11 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     "store",
     "stats",
     "paymentservice",
+    "authentication",
 ]
 
 MIDDLEWARE = [
