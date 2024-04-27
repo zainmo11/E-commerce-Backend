@@ -12,6 +12,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "drf_spectacular",
     "rest_framework",
     "store",
     "stats",
@@ -31,6 +32,16 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "distributed_project.urls"
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "E-Commerce site backend",
+    "DESCRIPTION": "API Documention for our E-commerce site",
+    "AUTHENTICATION_WHITELIST": ["authentication.authenticator.JWTAuthenticator"],
+}
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
 
 TEMPLATES = [
     {

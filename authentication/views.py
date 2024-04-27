@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.status import HTTP_201_CREATED, HTTP_406_NOT_ACCEPTABLE
 from rest_framework.views import APIView, Response
 
@@ -7,8 +8,10 @@ from .serializers import CredientalsSerializer, UserSerializer
 
 
 class AuthenticateUserView(APIView):
+    serializer_class = CredientalsSerializer
+
     def post(self, request):
-        user_credientals = CredientalsSerializer(data=request.data)
+        user_credientals = self.serializer_class(data=request.data)
         if user_credientals.is_valid():
             email = user_credientals.validated_data["email"]
             password = user_credientals.validated_data["password"]
@@ -20,8 +23,10 @@ class AuthenticateUserView(APIView):
 
 
 class RegisterUserView(APIView):
+    serializer_class = UserSerializer
+
     def post(self, request):
-        user_serializer = UserSerializer(data=request.data)
+        user_serializer = self.serializer_class(data=request.data)
         if user_serializer.is_valid(raise_exception=True):
             user_serializer.save()
             return Response(status=HTTP_201_CREATED)

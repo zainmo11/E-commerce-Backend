@@ -4,6 +4,8 @@ import jwt
 from django.conf import settings
 from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import User
+from drf_spectacular.extensions import OpenApiAuthenticationExtension
+from drf_spectacular.plumbing import build_bearer_security_scheme_object
 from rest_framework.authentication import BaseAuthentication, authenticate
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -91,3 +93,16 @@ class JWTAuthenticator(BaseAuthentication):
             raise AuthenticationFailed("Permission denied")
 
         return token
+
+
+class TokenScheme(OpenApiAuthenticationExtension):
+    target_class = "authentication.authenticator.JWTAuthenticator"
+    name = "tokenAuth"
+    match_subclasses = True
+    priority = -1
+
+    def get_security_definition(self, auto_schema):
+        return build_bearer_security_scheme_object(
+            header_name="Authorization",
+            token_prefix="Bearer",
+        )
