@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 
 import jwt
 from django.conf import settings
-from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 from drf_spectacular.plumbing import build_bearer_security_scheme_object
@@ -41,7 +41,7 @@ class JWToken:
 
     @classmethod
     def get_for_user(cls, email, password):
-        user = authenticate(email=email, password=password)
+        user = authenticate(username=email, password=password)
         if not user:
             raise AuthenticationFailed
 
@@ -56,10 +56,10 @@ class JWToken:
         return cls_instance
 
 
-class EmailAuthenticationBackend(BaseBackend):
-    def authenticate(self, request, email=None, password=None):
+class EmailAuthenticationBackend(ModelBackend):
+    def authenticate(self, request, username=None, password=None):
         try:
-            user = User.objects.get(email=email)
+            user = User.objects.get(email=username)
         except User.DoesNotExist:
             return None
 
