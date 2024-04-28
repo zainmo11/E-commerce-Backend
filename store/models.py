@@ -8,6 +8,10 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+    @property
+    def products_num(self):
+        return self.product_set.count()
+
 
 class Product(models.Model):
     thumbnail = models.CharField(max_length=250)

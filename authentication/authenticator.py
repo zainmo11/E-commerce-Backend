@@ -77,14 +77,16 @@ class EmailAuthenticationBackend(BaseBackend):
 class JWTAuthenticator(BaseAuthentication):
     def authenticate(self, request):
         token = self._get_token(request)
-        user = User.objects.get(id=token.user_id)
+        if not token:
+            return None
 
+        user = User.objects.get(id=token.user_id)
         return user, token
 
     def _get_token(self, request):
         token_header: str = request.headers.get("Authorization", None)
         if not token_header:
-            raise AuthenticationFailed("Permission denied")
+            return None
 
         try:
             token = token_header.split("Bearer")[1].lstrip()
