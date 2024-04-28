@@ -8,11 +8,13 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=50)
     amount = models.IntegerField()
     state = models.CharField(choices=state_types, max_length=1)
-    user = models.ForeignKey("stats.customer", on_delete=models.DO_NOTHING)
+    customer = models.ForeignKey(
+        "stats.customer", on_delete=models.DO_NOTHING, null=True
+    )
     products = models.ManyToManyField(to="store.product", through="OrderItems")
 
     def __str__(self):
-        return self.user.username + "'s order ID " + self.id
+        return self.customer.username + "'s order ID " + self.id
 
 
 class OrderItems(models.Model):
