@@ -31,7 +31,7 @@ class CartItem(models.Model):
     quantity = models.IntegerField()
 
     def __str__(self):
-        return self.user.username + "'s cart"
+        return self.customer.user.username + "'s cart"
 
 
 class Stats(models.Model):

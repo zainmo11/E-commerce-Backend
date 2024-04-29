@@ -18,7 +18,7 @@ class CategoriesListView(generics.ListAPIView):
         return context
 
 
-class ProductView(RetrieveModelMixin, ListModelMixin, generics.CreateAPIView):
+class ProductListView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthenticator]
     permission_classes = [IsSellerOrReadOnly]
     serializer_class = ProductSerlializer
@@ -39,10 +39,7 @@ class ProductView(RetrieveModelMixin, ListModelMixin, generics.CreateAPIView):
 
         return queryset
 
-    def get(self, request, *args, **kwargs):
-        try:
-            return self.retrieve(request)
-        except AssertionError:
-            pass
 
-        return self.list(request)
+class ProductDetailView(generics.RetrieveAPIView):
+    serializer_class = ProductSerlializer
+    queryset = Product.objects.all()
