@@ -23,7 +23,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("", SpectacularSwaggerView.as_view()),
     path("api/auth/", include("authentication.urls")),
-    path("api/home/", include("store.urls")),
+    path("api/home/", include("store.urls", namespace="store")),
     path("api/stats/", include("stats.urls")),
     path("api/payment/", include("paymentservice.urls")),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),

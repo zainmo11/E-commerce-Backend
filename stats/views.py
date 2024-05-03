@@ -5,12 +5,15 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from authentication.authenticator import JWTAuthenticator
-from store.serializers import ProductSerlializer
+from store.models import Product
+from store.permissions import IsSeller
+from store.serializers import PrivateProductSerializer, ProductSerializer
 
 from .models import CartItem, Customer, Seller
 from .serializers import (
     CartItemListCreateSerializer,
     CartItemUpdateDeleteSerializer,
+    PrivateSellerSerializer,
     SellerSerializer,
     WishlistProductSerializer,
 )
@@ -23,6 +26,28 @@ class SellerListView(generics.ListAPIView):
         number = int(self.request.query_params.get("n", 10))
         queryset = Seller.objects.all()[:number]
         return queryset
+
+
+class PrivateSellerInfoView(generics.RetrieveAPIView):
+    queryset = Seller.objects.all().select_related("user")
+    serializer_class = PrivateSellerSerializer
+    authentication_classes = [JWTAuthenticator]
+    permission_classes = [IsSeller]
+
+    def get_object(self):
+        user = self.request.user
+        return self.queryset.get(user=user)
+
+
+class LowOnStockProductsView(generics.ListAPIView):
+    serializer_class = PrivateProductSerializer
+
+    authentication_classes = [JWTAuthenticator]
+    permission_classes = [IsSeller]
+
+    def get_queryset(self):
+        user = self.request.user
+        return Product.objects.filter(seller__user=user, quantity__lte=5)
 
 
 class AddProductToWishlistView(APIView):
@@ -66,7 +91,7 @@ class ClearWishlistView(generics.DestroyAPIView):
 
 
 class GetWishlistView(generics.ListAPIView):
-    serializer_class = ProductSerlializer
+    serializer_class = ProductSerializer
     authentication_classes = [JWTAuthenticator]
     permission_classes = [IsAuthenticated]
 

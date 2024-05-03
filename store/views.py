@@ -1,11 +1,11 @@
 from rest_framework import generics
-from rest_framework.mixins import ListModelMixin, RetrieveModelMixin
+from rest_framework.permissions import SAFE_METHODS
 
 from authentication.authenticator import JWTAuthenticator
 
 from .models import Category, Product
 from .permissions import IsSellerOrReadOnly
-from .serializers import CategorySerializer, ProductSerlializer
+from .serializers import CategorySerializer, ProductSerializer
 
 
 class CategoriesListView(generics.ListAPIView):
@@ -21,7 +21,7 @@ class CategoriesListView(generics.ListAPIView):
 class ProductListView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthenticator]
     permission_classes = [IsSellerOrReadOnly]
-    serializer_class = ProductSerlializer
+    serializer_class = ProductSerializer
 
     def get_queryset(self):
         seller = self.request.query_params.get("seller")
@@ -40,6 +40,14 @@ class ProductListView(generics.ListCreateAPIView):
         return queryset
 
 
-class ProductDetailView(generics.RetrieveAPIView):
-    serializer_class = ProductSerlializer
-    queryset = Product.objects.all()
+class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ProductSerializer
+    authentication_classes = [JWTAuthenticator]
+    permission_classes = [IsSellerOrReadOnly]
+
+    def get_queryset(self):
+        user = self.request.user
+        if self.request.method not in SAFE_METHODS:
+            return Product.objects.filter(seller__user=user)
+
+        return Product.objects.all()

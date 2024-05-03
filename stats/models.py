@@ -1,6 +1,8 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 
+from store.models import Product
+
 User = get_user_model()
 
 
@@ -17,11 +19,21 @@ class Customer(models.Model):
 
 class Seller(models.Model):
     user = models.OneToOneField(to=User, primary_key=True, on_delete=models.CASCADE)
+    total_revenue = models.DecimalField(default=0, max_digits=10, decimal_places=2)
+    total_products_sold = models.IntegerField(default=0)
     company_name = models.CharField(max_length=50)
     location = models.CharField(max_length=150)
 
     def __str__(self):
         return "Seller: " + self.company_name
+
+    @property
+    def products_num(self):
+        return self.product_set.count()
+
+    @property
+    def out_of_stock_num(self):
+        return self.product_set.filter(quantity=0).count()
 
 
 class CartItem(models.Model):
@@ -56,6 +68,7 @@ class Stats(models.Model):
 class Comment(models.Model):
     stats = models.ForeignKey(to=Stats, on_delete=models.CASCADE, null=True)
     author = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True)
+    product = models.ForeignKey(to=Product, on_delete=models.SET_NULL, null=True)
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
     title = models.CharField(max_length=150, null=True)
     comment = models.TextField()

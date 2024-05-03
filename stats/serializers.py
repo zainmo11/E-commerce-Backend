@@ -1,12 +1,14 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
+from django.db.models import Avg
 from rest_framework import serializers
 
 from authentication.serializers import UserSerializer
 from store.models import Product
+from store.serializers import PrivateProductSerializer, ProductSerializer
 
-from .models import CartItem, Customer, Seller
+from .models import CartItem, Customer, Seller, Stats
 
 User = get_user_model()
 
@@ -47,10 +49,11 @@ class CustomerReadUpdateDeleteSerializer(serializers.ModelSerializer):
 
 class SellerSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    products = ProductSerializer(source="product_set", read_only=True, many=True)
 
     class Meta:
         model = Seller
-        fields = ["user", "company_name", "location"]
+        fields = ["user", "company_name", "location", "products"]
 
     def validate(self, data):
         self.user = self.context["request"].user
@@ -67,6 +70,25 @@ class SellerSerializer(serializers.ModelSerializer):
             company_name=validated_data["company_name"],
             location=validated_data["location"],
         )
+
+
+class PrivateSellerSerializer(SellerSerializer):
+    average_product_rating = serializers.SerializerMethodField("get_average_rating")
+    products = PrivateProductSerializer(source="product_set", read_only=True, many=True)
+
+    class Meta(SellerSerializer.Meta):
+        fields = SellerSerializer.Meta.fields + [
+            "total_revenue",
+            "total_products_sold",
+            "products_num",
+            "out_of_stock_num",
+            "average_product_rating",
+        ]
+
+    def get_average_rating(self, obj):
+        return Stats.objects.filter(product__seller=obj).aggregate(
+            Avg("rating", default=0)
+        )["rating__avg"]
 
 
 class WishlistProductSerializer(serializers.Serializer):
