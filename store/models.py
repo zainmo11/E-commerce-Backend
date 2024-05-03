@@ -14,12 +14,12 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    thumbnail = models.CharField(max_length=250)
+    thumbnail = models.URLField(max_length=400, blank=True)
     name = models.CharField(max_length=150)
     description = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
     quantity = models.IntegerField()
-    specs = models.JSONField(null=True)
+    specs = models.JSONField(blank=True, null=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
     seller = models.ForeignKey(to="stats.seller", on_delete=models.CASCADE, null=True)
 
@@ -36,6 +36,6 @@ class Color(models.Model):
 
 
 class Image(models.Model):
-    link = models.CharField(max_length=250)
+    link = models.URLField(max_length=400, blank=True)
     product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
     color = models.ForeignKey(to=Color, on_delete=models.CASCADE, null=True)

@@ -7,8 +7,9 @@ User = get_user_model()
 # Create your models here.
 class Customer(models.Model):
     user = models.OneToOneField(to=User, primary_key=True, on_delete=models.CASCADE)
-    address = models.CharField(max_length=150)
-    wishlist = models.ManyToManyField(to="store.product")
+    avatar = models.URLField(max_length=400, blank=True)
+    address = models.CharField(max_length=150, blank=True)
+    wishlist = models.ManyToManyField(to="store.product", blank=True)
 
     def __str__(self):
         return "Customer: " + self.user.username

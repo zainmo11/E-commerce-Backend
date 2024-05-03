@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from rest_framework import serializers
@@ -6,6 +7,8 @@ from authentication.serializers import UserSerializer
 from store.models import Product
 
 from .models import CartItem, Customer, Seller
+
+User = get_user_model()
 
 
 def validate_quantity(obj):
@@ -16,13 +19,38 @@ def validate_quantity(obj):
     return obj
 
 
+class CustomerRegistrationSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = Customer
+        fields = ["user", "avatar", "address", "wishlist"]
+        read_only_fields = ["wishlist"]
+
+    def create(self, validated_data):
+        user_data = validated_data.pop("user")
+        user_serializer = UserSerializer(data=user_data)
+        if user_serializer.is_valid(raise_exception=True):
+            user = user_serializer.save()
+        customer = Customer.objects.create(user=user, **validated_data)
+        return customer
+
+
+class CustomerReadUpdateDeleteSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = Customer
+        fields = ["user", "avatar", "address", "wishlist"]
+        read_only_fields = ["wishlist"]
+
+
 class SellerSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
+    user = UserSerializer(read_only=True)
 
     class Meta:
         model = Seller
         fields = ["user", "company_name", "location"]
-        read_only_fields = ["user"]
 
     def validate(self, data):
         self.user = self.context["request"].user
@@ -39,39 +67,6 @@ class SellerSerializer(serializers.ModelSerializer):
             company_name=validated_data["company_name"],
             location=validated_data["location"],
         )
-
-    def get_user(self, obj):
-        user = UserSerializer(obj.user)
-        return user.data
-
-
-class CustomerSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Customer
-        fields = ["user", "address", "wishlist"]
-        read_only_fields = ["user"]
-
-    def validate(self, data):
-        self.user = self.context["request"].user
-        try:
-            Customer.objects.get(user=self.user)
-            raise serializers.ValidationError({"details": "User is already a customer"})
-        except ObjectDoesNotExist:
-            pass
-        return data
-
-    def create(self, validated_data):
-        return Customer.objects.create(
-            user=self.user,
-            address=validated_data["address"],
-            wishlist=validated_data["wishlist"],
-        )
-
-    def get_user(self, obj):
-        user = UserSerializer(obj.user)
-        return user.data
 
 
 class WishlistProductSerializer(serializers.Serializer):

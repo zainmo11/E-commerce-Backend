@@ -7,6 +7,11 @@ class ProductSerlializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = "__all__"
+        read_only_fields = ["seller"]
+
+    def create(self, validated_data):
+        validated_data["seller"] = self.context["request"].user.seller
+        return super().create(validated_data)
 
 
 class CategorySerializer(serializers.ModelSerializer):
