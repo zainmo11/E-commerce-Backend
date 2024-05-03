@@ -25,10 +25,15 @@ class Seller(models.Model):
 
 class CartItem(models.Model):
     customer = models.ForeignKey(to=Customer, on_delete=models.CASCADE, null=True)
-    cart_item = models.ForeignKey(
-        to="store.product", on_delete=models.CASCADE, null=True
-    )
+    product = models.ForeignKey(to="store.product", on_delete=models.CASCADE, null=True)
     quantity = models.IntegerField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["customer", "product"], name="user_cart_item_constraint"
+            )
+        ]
 
     def __str__(self):
         return self.customer.user.username + "'s cart"

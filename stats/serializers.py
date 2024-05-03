@@ -1,9 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from rest_framework import serializers
 
 from authentication.serializers import UserSerializer
 
-from .models import Seller
+from .models import CartItem, Seller
 
 
 class SellerSerializer(serializers.ModelSerializer):
@@ -33,3 +34,36 @@ class SellerSerializer(serializers.ModelSerializer):
     def get_user(self, obj):
         user = UserSerializer(obj.user)
         return user.data
+
+
+def validate_quantity(obj):
+    if obj["quantity"] <= 0:
+        raise serializers.ValidationError(
+            {"details": "Product quantity must be greater than 0"}
+        )
+    return obj
+
+
+class CartItemListCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ["id", "customer", "product", "quantity"]
+        read_only_fields = ["id", "customer"]
+        validators = [validate_quantity]
+
+    def create(self, validated_data):
+        try:
+            validated_data["customer"] = self.context["request"].user.customer
+            return super().create(validated_data)
+        except IntegrityError:
+            raise serializers.ValidationError(
+                {"details": "The customer already has this product in his cart"}
+            )
+
+
+class CartItemUpdateDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CartItem
+        fields = ["id", "customer", "product", "quantity"]
+        read_only_fields = ["id", "customer", "product"]
+        validators = [validate_quantity]
