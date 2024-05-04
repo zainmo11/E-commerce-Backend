@@ -101,14 +101,16 @@ class GetWishlistView(generics.ListAPIView):
         return customer.wishlist
 
 
-class CartItemListDeleteView(generics.ListCreateAPIView):
+class CartItemListCreateDeleteView(generics.ListCreateAPIView):
     serializer_class = CartItemListCreateSerializer
     authentication_classes = [JWTAuthenticator]
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         customer = self.request.user
-        items = CartItem.objects.filter(customer__user=customer)
+        items = CartItem.objects.filter(customer__user=customer).prefetch_related(
+            "product"
+        )
         return items
 
     def delete(self, request, *args, **kwargs):

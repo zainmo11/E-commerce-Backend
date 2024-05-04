@@ -6,7 +6,11 @@ from rest_framework import serializers
 
 from authentication.serializers import UserSerializer
 from store.models import Product
-from store.serializers import PrivateProductSerializer, ProductSerializer
+from store.serializers import (
+    PathField,
+    PrivateProductSerializer,
+    ProductSerializer,
+)
 
 from .models import CartItem, Customer, Seller, Stats
 
@@ -104,6 +108,10 @@ class WishlistProductSerializer(serializers.Serializer):
 
 
 class CartItemListCreateSerializer(serializers.ModelSerializer):
+    product = PathField(
+        view_name="store:products_retrieve", queryset=Product.objects.all()
+    )
+
     class Meta:
         model = CartItem
         fields = ["id", "customer", "product", "quantity"]
@@ -121,6 +129,8 @@ class CartItemListCreateSerializer(serializers.ModelSerializer):
 
 
 class CartItemUpdateDeleteSerializer(serializers.ModelSerializer):
+    product = PathField(view_name="store:products_retrieve", read_only=True)
+
     class Meta:
         model = CartItem
         fields = ["id", "customer", "product", "quantity"]
