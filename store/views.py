@@ -1,8 +1,10 @@
-from rest_framework import generics
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, generics
 from rest_framework.permissions import SAFE_METHODS
 
 from authentication.authenticator import JWTAuthenticator
 
+from .filters import PlainPageNumberPagination, ProductFilter
 from .models import Category, Product
 from .permissions import IsSellerOrReadOnly
 from .serializers import CategorySerializer, ProductSerializer
@@ -21,7 +23,13 @@ class CategoriesListView(generics.ListAPIView):
 class ProductListView(generics.ListCreateAPIView):
     authentication_classes = [JWTAuthenticator]
     permission_classes = [IsSellerOrReadOnly]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+
     serializer_class = ProductSerializer
+    filterset_class = ProductFilter
+    pagination_class = PlainPageNumberPagination
+
+    search_fields = ["name", "description"]
 
     def get_queryset(self):
         seller = self.request.query_params.get("seller")
@@ -29,15 +37,6 @@ class ProductListView(generics.ListCreateAPIView):
             return Product.objects.filter(seller=seller)
 
         return Product.objects.all()
-
-    def filter_queryset(self, queryset):
-        # May use django filters later
-        # TODO: add all other filter, best sellers
-        filter = self.request.query_params.get("filter", "")
-        if filter == "hottest":
-            return queryset.order_by("price")
-
-        return queryset
 
 
 class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):

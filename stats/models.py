@@ -62,7 +62,7 @@ class Stats(models.Model):
     dislikes = models.IntegerField(default=0)
 
     def __str__(self):
-        return "Product: " + self.product.name + ", rating: " + self.rating
+        return "Product: " + self.product.name + ", rating: " + str(self.rating)
 
 
 class Comment(models.Model):
