@@ -107,6 +107,34 @@ class WishlistProductSerializer(serializers.Serializer):
         return product
 
 
+class CartListSerializer(serializers.ListSerializer):
+    def to_representation(self, data):
+        total_price = sum(
+            cart_item.product.price * cart_item.quantity for cart_item in data
+        )
+        serialized_data = super().to_representation(data)
+        new_data = {"cart": serialized_data, "total_price": total_price}
+        return new_data
+
+    @property
+    def data(self):
+        """
+        The same implementation of BaseSerializer to skip the implementation
+        of ListSerializer
+        """
+
+        if not hasattr(self, "_data"):
+            if self.instance is not None and not getattr(self, "_errors", None):
+                self._data = self.to_representation(self.instance)
+            elif hasattr(self, "_validated_data") and not getattr(
+                self, "_errors", None
+            ):
+                self._data = self.to_representation(self.validated_data)
+            else:
+                self._data = self.get_initial()
+        return self._data
+
+
 class CartItemListCreateSerializer(serializers.ModelSerializer):
     product = PathField(
         view_name="store:products_retrieve", queryset=Product.objects.all()
@@ -117,6 +145,8 @@ class CartItemListCreateSerializer(serializers.ModelSerializer):
         fields = ["id", "customer", "product", "quantity"]
         read_only_fields = ["id", "customer"]
         validators = [validate_quantity]
+
+        list_serializer_class = CartListSerializer
 
     def create(self, validated_data):
         try:
