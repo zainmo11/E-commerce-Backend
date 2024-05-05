@@ -27,9 +27,6 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
             if len(attrs["credit_card_number"]) != 16:
                 raise serializers.ValidationError("Invalid credit card number")
 
-            if attrs["payment_amount"] < 0:
-                raise serializers.ValidationError("Invalid payment amount")
-
             if attrs["payment_date"] > payment_date:
                 raise serializers.ValidationError("Invalid payment date")
 
@@ -37,8 +34,6 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("Invalid credit card expiry date")
 
         if attrs["payment_method"] == "cash":
-            if len(attrs["payment_amount"]) < 0:
-                raise serializers.ValidationError("Invalid payment amount")
             if attrs["payment_date"] > payment_date:
                 raise serializers.ValidationError("Invalid payment date")
 
