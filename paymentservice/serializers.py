@@ -14,7 +14,7 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentDetails
         fields = "__all__"
-        read_only_fields = ["id"]
+        read_only_fields = ["id", "payment_amount"]
 
     def validate(self, attrs):
         payment_date = datetime.fromisoformat("2024-05-04T20:10:34.147Z").replace(
@@ -85,8 +85,10 @@ class OrderSerializer(serializers.ModelSerializer):
             # sellers to a set and the different products and saving them invidually
             product_seller.save()
             referred_product.save()
-        order.payment_set = PaymentDetails.objects.create(**payment_details)
+
         order.amount = amount
+        payment_details["payment_amount"] = amount
+        order.payment_set = PaymentDetails.objects.create(**payment_details)
         order.save()
 
         return order
