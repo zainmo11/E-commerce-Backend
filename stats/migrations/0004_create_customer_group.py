@@ -8,7 +8,7 @@ def create_customer_group(apps, schema_editor):
     ContentType = apps.get_model("contenttypes", "ContentType")
     Permission = apps.get_model("auth", "Permission")
 
-    content_type = ContentType.objects.get(app_label="stats", model="cartitem")
+    content_type,_ = ContentType.objects.get_or_create(app_label="stats", model="cartitem")
     manage_cart_permission = Permission.objects.create(
         codename="manage_cartitem",
         name="Can manage cart item",

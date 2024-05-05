@@ -5,7 +5,9 @@ from django.db import models
 class Order(models.Model):
     state_types = {"p": "pending", "o": "out for delivery", "d": "delivered"}
 
-    payment_method = models.CharField(max_length=50)
+    payment_set = models.ForeignKey(
+        to="PaymentDetails", on_delete=models.DO_NOTHING, null=True
+    )
     amount = models.IntegerField()
     state = models.CharField(choices=state_types, max_length=1)
     customer = models.ForeignKey(
@@ -15,6 +17,26 @@ class Order(models.Model):
 
     def __str__(self):
         return self.customer.user.username + "'s order ID " + self.id
+
+
+class PaymentDetails(models.Model):
+    payment_method = models.CharField(max_length=50)
+    credit_card_number = models.CharField(max_length=16)
+    credit_card_expiry = models.DateField()
+    payment_date = models.DateTimeField()
+    payment_amount = models.IntegerField()
+
+    def __str__(self):
+        return (
+            "payment method :"
+            + self.payment_method
+            + " payment of :"
+            + str(self.payment_amount)
+            + " made on :"
+            + str(self.payment_date)
+            + " with card number "
+            + self.credit_card_number
+        )
 
 
 class OrderItems(models.Model):
