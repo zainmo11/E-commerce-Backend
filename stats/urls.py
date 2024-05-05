@@ -8,12 +8,14 @@ from .views import (
     GetWishlistView,
     LowOnStockProductsView,
     PrivateSellerInfoView,
+    ProfileView,
     RemoveProductWishlistView,
     SellerListView,
 )
 
 urlpatterns = [
     path("sellers/", SellerListView.as_view()),
+    path("profile/", ProfileView.as_view()),
     path("my-seller-info/", PrivateSellerInfoView.as_view()),
     path("low-stock-products/", LowOnStockProductsView.as_view()),
     path("cart-items/", CartItemListCreateDeleteView.as_view()),

@@ -13,6 +13,7 @@ from .models import CartItem, Customer, Seller
 from .serializers import (
     CartItemListCreateSerializer,
     CartItemUpdateDeleteSerializer,
+    CustomerReadUpdateDeleteSerializer,
     PrivateSellerSerializer,
     SellerSerializer,
     WishlistProductSerializer,
@@ -48,6 +49,18 @@ class LowOnStockProductsView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Product.objects.filter(seller__user=user, quantity__lte=5)
+
+
+class ProfileView(generics.RetrieveUpdateAPIView):
+    serializer_class = CustomerReadUpdateDeleteSerializer
+    queryset = Customer.objects.all().prefetch_related("order_set")
+
+    authentication_classes = [JWTAuthenticator]
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        user = self.request.user
+        return self.queryset.get(user=user)
 
 
 class AddProductToWishlistView(APIView):

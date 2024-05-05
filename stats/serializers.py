@@ -5,6 +5,7 @@ from django.db.models import Avg
 from rest_framework import serializers
 
 from authentication.serializers import UserSerializer
+from paymentservice.serializers import OrderSerializer
 from store.models import Product
 from store.serializers import (
     PathField,
@@ -43,12 +44,32 @@ class CustomerRegistrationSerializer(serializers.ModelSerializer):
 
 
 class CustomerReadUpdateDeleteSerializer(serializers.ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserSerializer()
+    order_set = OrderSerializer(read_only=True, many=True)
 
     class Meta:
         model = Customer
-        fields = ["user", "avatar", "address", "wishlist"]
+        fields = ["user", "avatar", "address", "wishlist", "order_set"]
         read_only_fields = ["wishlist"]
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user")
+        user = instance.user
+
+        user.username = user_data.get("username", user.username)
+        user.first_name = user_data.get("first_name", user.first_name)
+        user.last_name = user_data.get("last_name", user.last_name)
+        user.email = user_data.get("email", user.email)
+
+        password = user_data.get("password", None)
+        if password:
+            user.set_password(password)
+        user.save()
+
+        instance.avatar = validated_data.get("avatar", instance.avatar)
+        instance.address = validated_data.get("address", instance.address)
+        instance.save()
+        return instance
 
 
 class SellerSerializer(serializers.ModelSerializer):
