@@ -24,6 +24,7 @@ class ProductSerializer(serializers.ModelSerializer):
     product_path = PathField(
         view_name="store:products_retrieve", source="id", read_only=True
     )
+    category_name = serializers.CharField(source="category", read_only=True)
 
     class Meta:
         model = Product
@@ -35,6 +36,7 @@ class ProductSerializer(serializers.ModelSerializer):
             "quantity",
             "specs",
             "category",
+            "category_name",
             "seller",
             "product_path",
         ]
