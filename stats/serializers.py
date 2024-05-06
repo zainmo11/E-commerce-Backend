@@ -75,10 +75,11 @@ class CustomerReadUpdateDeleteSerializer(serializers.ModelSerializer):
 class SellerSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
     products = ProductSerializer(source="product_set", read_only=True, many=True)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = Seller
-        fields = ["user", "company_name", "location", "products"]
+        fields = ["user", "company_name", "location", "products", "avatar"]
 
     def validate(self, data):
         self.user = self.context["request"].user
@@ -95,6 +96,10 @@ class SellerSerializer(serializers.ModelSerializer):
             company_name=validated_data["company_name"],
             location=validated_data["location"],
         )
+
+    def get_avatar(self, obj):
+        customer = obj.user.customer
+        return customer.avatar
 
 
 class PrivateSellerSerializer(SellerSerializer):
