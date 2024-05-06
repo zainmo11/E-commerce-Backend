@@ -160,10 +160,11 @@ class CartItemListCreateSerializer(serializers.ModelSerializer):
     product = PathField(
         view_name="store:products_retrieve", queryset=Product.objects.all()
     )
+    product_details = serializers.SerializerMethodField()
 
     class Meta:
         model = CartItem
-        fields = ["id", "customer", "product", "quantity"]
+        fields = ["id", "customer", "product", "quantity", "product_details"]
         read_only_fields = ["id", "customer"]
         validators = [validate_quantity]
 
@@ -177,6 +178,9 @@ class CartItemListCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"details": "The customer already has this product in his cart"}
             )
+
+    def get_product_details(self, obj):
+        return ProductSerializer(obj.product).data
 
 
 class CartItemUpdateDeleteSerializer(serializers.ModelSerializer):
