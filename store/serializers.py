@@ -60,7 +60,7 @@ class CategorySerializer(serializers.ModelSerializer):
     category_path = PathField(
         source="id",
         view_name="store:products_view",
-        query_param_name="cat",
+        query_param_name="categories",
         read_only=True,
     )
 
