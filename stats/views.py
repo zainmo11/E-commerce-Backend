@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.mixins import DestroyModelMixin
 from rest_framework.permissions import IsAuthenticated
@@ -60,7 +61,7 @@ class ProfileView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         user = self.request.user
-        return self.queryset.get(user=user)
+        return get_object_or_404(self.queryset, user=user)
 
 
 class AddProductToWishlistView(APIView):
