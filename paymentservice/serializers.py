@@ -14,10 +14,10 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentDetails
         fields = "__all__"
-        read_only_fields = ["id", "payment_amount"]
+        read_only_fields = ["id"]
 
     def validate(self, attrs):
-        payment_date = datetime.fromisoformat("2024-05-04T20:10:34.147Z").replace(
+        payment_date = datetime.fromisoformat(datetime.now().__str__()).replace(
             tzinfo=pytz.utc
         )
         if attrs["payment_method"] not in ["credit card", "cash"]:
@@ -30,7 +30,12 @@ class PaymentDetailsSerializer(serializers.ModelSerializer):
             if attrs["payment_date"] > payment_date:
                 raise serializers.ValidationError("Invalid payment date")
 
-            if attrs["credit_card_expiry"] < datetime.date(datetime.now()):
+            if (
+                len(attrs["credit_card_expiry"]) != 5
+                and attrs["credit_card_expiry"][2] != "/"
+                and int(attrs["credit_card_expiry"][0:2]) > datetime.now().month
+                and int(attrs["credit_card_expiry"][3:5]) > datetime.now().year
+            ):
                 raise serializers.ValidationError("Invalid credit card expiry date")
 
         if attrs["payment_method"] == "cash":
@@ -80,10 +85,8 @@ class OrderSerializer(serializers.ModelSerializer):
             # sellers to a set and the different products and saving them invidually
             product_seller.save()
             referred_product.save()
-
-        order.amount = amount
-        payment_details["payment_amount"] = amount
         order.payment_set = PaymentDetails.objects.create(**payment_details)
+        order.amount = amount
         order.save()
 
         return order

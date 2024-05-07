@@ -21,10 +21,9 @@ class Order(models.Model):
 
 class PaymentDetails(models.Model):
     payment_method = models.CharField(max_length=50)
-    credit_card_number = models.CharField(max_length=16)
-    credit_card_expiry = models.DateField()
+    credit_card_number = models.CharField(max_length=16, null=True)
+    credit_card_expiry = models.CharField(max_length=5, null=True)
     payment_date = models.DateTimeField()
-    payment_amount = models.IntegerField()
 
     def __str__(self):
         return (
