@@ -5,7 +5,7 @@ import dj_database_url
 from .base import *  # noqa: F403
 
 # For now
-BEBUG = True
+BEBUG = False
 
 ALLOWED_HOSTS = []
 
